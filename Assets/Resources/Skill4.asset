@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78046e253cd61c54dba1c57fa9f90016, type: 3}
   m_Name: Skill4
   m_EditorClassIdentifier: 
-  skillName: "\uB098\uBB34 4"
-  description: 
-  icon: {fileID: 0}
+  skillName: AttackSkill
+  description: "\uBA38\uB9AC\uAE68\uB294  \uC2A4\uD0AC"
+  icon: {fileID: 21300000, guid: 48b2650477f24a44aa2ea4ff97548cf5, type: 3}
   unlocked: 1
   requiredGrowthPoint: 6
   nextSkills: []

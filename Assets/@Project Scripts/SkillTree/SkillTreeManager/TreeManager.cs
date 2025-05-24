@@ -1,9 +1,9 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TreeManager : MonoBehaviour
 {
     public SkillTreeSO skillTree;
+    public SkillTreeUI skillTreeUI;
     public int currentGrowthPoint;
 
     public void TryUnlock(SkillNodeSO node)
@@ -12,16 +12,19 @@ public class TreeManager : MonoBehaviour
         {
             node.unlocked = true;
             Debug.Log($"[Unlocked] {node.skillName}");
+
+            RectTransform parent = skillTreeUI.GetParentRect(node);
+            int depth = skillTreeUI.GetDepthOfParent(node);
+
+            skillTreeUI.CreateSkillUI(node, depth, parent);
         }
 
-        foreach (var child in node.nextSkills)
+        if (node.unlocked)
         {
-            TryUnlock(child); // 다음 스킬도 재귀로 확인
+            foreach (var child in node.nextSkills)
+            {
+                TryUnlock(child);
+            }
         }
-    }
-
-    private void Start()
-    {
-        TryUnlock(skillTree.rootSkill);
     }
 }

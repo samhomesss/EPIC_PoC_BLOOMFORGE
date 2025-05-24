@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78046e253cd61c54dba1c57fa9f90016, type: 3}
   m_Name: Skill1
   m_EditorClassIdentifier: 
-  skillName: "\uB098\uBB341"
-  description: 
-  icon: {fileID: 0}
+  skillName: SwordAttack
+  description: "\uCE7C\uC744 \uD718\uB450\uB985\uB2C8\uB2E4."
+  icon: {fileID: 21300000, guid: ba0f514ff177c364e80cade4c3cd3670, type: 3}
   unlocked: 1
   requiredGrowthPoint: 0
   nextSkills:

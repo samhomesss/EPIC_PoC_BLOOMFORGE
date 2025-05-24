@@ -9,61 +9,93 @@ public class SkillTreeUI : MonoBehaviour
     public TreeManager treeManager;
 
     [Header("Prefabs & UI")]
-    public GameObject skillUIPrefab;      // 노드 UI 프리팹
-    public GameObject lineImagePrefab;    // 선 UI 프리팹 (얇은 이미지)
-    public Transform skillRootParent;     // 모든 노드/선을 담을 부모
+    public GameObject skillUIPrefab;
+    public GameObject lineImagePrefab;
+    public Transform skillRootParent;
 
     [Header("Spacing")]
-    public float xSpacing = 300f; // 좌우 간격
-    public float ySpacing = 200f; // 위아래 간격 (음수면 아래로 배치)
+    public float xSpacing = 300f;
+    public float ySpacing = 200f;
+
+    private Dictionary<int, int> depthToIndex = new();
+    private Dictionary<SkillNodeSO, RectTransform> nodeToUI = new();
+    private Dictionary<SkillNodeSO, int> nodeDepthMap = new();
 
     private void Start()
     {
+        treeManager.skillTreeUI = this;
+
         if (treeData == null || treeData.rootSkill == null)
         {
             Debug.LogError("SkillTreeSO 또는 rootSkill이 설정되지 않았습니다.");
             return;
         }
 
-        CreateSkillUI(treeData.rootSkill, 0, 0, null);
+        foreach (var node in treeData.AllNodes())
+            node.unlocked = false;
+
+        treeData.rootSkill.unlocked = true;
+
+        CreateSkillUI(treeData.rootSkill, 0, null);
     }
 
-    void CreateSkillUI(SkillNodeSO node, int depth, int index, RectTransform parentUI)
+    public void CreateSkillUI(SkillNodeSO node, int depth, RectTransform parentUI)
     {
-        // 1. 위치 계산
+        if (!depthToIndex.ContainsKey(depth))
+            depthToIndex[depth] = 0;
+
+        int index = depthToIndex[depth];
+        depthToIndex[depth]++;
+
         Vector3 position = new Vector3(index * xSpacing, -depth * ySpacing, 0);
 
-        // 2. 스킬 노드 UI 생성
         GameObject go = Instantiate(skillUIPrefab, skillRootParent);
         RectTransform currentUI = go.GetComponent<RectTransform>();
         currentUI.anchoredPosition = position;
 
-        // 3. 데이터 바인딩
         SkillNodeUI ui = go.GetComponent<SkillNodeUI>();
         ui.Setup(node, treeManager);
 
-        // 4. 선 연결 (부모가 있다면)
-        if (parentUI != null)
-        {
-            CreateLineBetween(parentUI, currentUI);
-        }
+        nodeToUI[node] = currentUI;
+        nodeDepthMap[node] = depth;
 
-        // 5. 자식 노드들 생성 (재귀)
-        for (int i = 0; i < node.nextSkills.Count; i++)
+        if (parentUI != null)
+            CreateLineBetween(parentUI, currentUI);
+
+        foreach (SkillNodeSO child in node.nextSkills)
         {
-            CreateSkillUI(node.nextSkills[i], depth + 1, i, currentUI);
+            if (!child.unlocked) continue;
+            CreateSkillUI(child, depth + 1, currentUI);
         }
     }
 
     public void CreateLineBetween(RectTransform from, RectTransform to)
     {
         GameObject lineGO = Instantiate(lineImagePrefab, skillRootParent);
-        lineGO.transform.SetAsFirstSibling(); // 선을 가장 아래에 위치시킴
-
+        lineGO.transform.SetAsFirstSibling();
         UILineConnector connector = lineGO.AddComponent<UILineConnector>();
         connector.from = from;
         connector.to = to;
         connector.lineRect = lineGO.GetComponent<RectTransform>();
     }
 
+    public RectTransform GetParentRect(SkillNodeSO node)
+    {
+        foreach (var kv in nodeToUI)
+        {
+            if (kv.Key.nextSkills.Contains(node))
+                return kv.Value;
+        }
+        return null;
+    }
+
+    public int GetDepthOfParent(SkillNodeSO node)
+    {
+        foreach (var kv in nodeToUI)
+        {
+            if (kv.Key.nextSkills.Contains(node))
+                return nodeDepthMap.ContainsKey(kv.Key) ? nodeDepthMap[kv.Key] + 1 : 1;
+        }
+        return 0;
+    }
 }

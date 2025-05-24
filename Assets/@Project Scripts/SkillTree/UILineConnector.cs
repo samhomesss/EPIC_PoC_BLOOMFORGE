@@ -19,9 +19,8 @@ public class UILineConnector : MonoBehaviour
         lineRect.sizeDelta = new Vector2(distance, lineRect.sizeDelta.y);
         lineRect.position = (start + end) / 2f;
 
-        // 👉 회전 보정
         lineRect.rotation = Quaternion.FromToRotation(Vector3.right, direction);
         if (direction.y < 0)
-            lineRect.rotation *= Quaternion.Euler(0, 0, 180); // 뒤집기
+            lineRect.rotation *= Quaternion.Euler(0, 0, 180);
     }
 }
