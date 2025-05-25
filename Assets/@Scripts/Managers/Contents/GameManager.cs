@@ -43,10 +43,25 @@ public class GameManager
     }
     #endregion
 
+
+
     #region Action
     public event Action<Vector2> OnMoveDirChanged;
     public event Action<bool> OnAttackActionEvent;
     public event Action<Define.EInputSystemState> OnInputSystemStateChanged;
+
+
+    /// UI
+    /// TODO : 나무를 관리하는것에 필요한 도구들을 정리 
+    public event Action<int> OnGiveWaterEvent; // 나무에 물을 주었을때 발생할 이벤트 
+    public event Action<int> OnGiveLightEvent; // 나무에 빛을 제공해주는 것 
+    public event Action<bool> OnGiveBugDestroyToolEvent; // 해충 없애주는 이벤트 
+
+    public void GiveWaterUI(int waterPoint)
+    {
+        OnGiveWaterEvent?.Invoke(waterPoint);
+    }
+
     #endregion
 
     public void DisConnect()
