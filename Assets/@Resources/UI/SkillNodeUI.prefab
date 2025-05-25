@@ -224,6 +224,7 @@ GameObject:
   - component: {fileID: -5840543205519821289}
   - component: {fileID: 7347327633748005847}
   - component: {fileID: 5764150782266666426}
+  - component: {fileID: 657364085083103550}
   m_Layer: 5
   m_Name: SkillNodeUI
   m_TagString: Untagged
@@ -350,3 +351,17 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &657364085083103550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4340219489229350971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76174b21a1aa2ab4a8a113dcc4f3d7dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  node: {fileID: 0}
+  treeManager: {fileID: 0}

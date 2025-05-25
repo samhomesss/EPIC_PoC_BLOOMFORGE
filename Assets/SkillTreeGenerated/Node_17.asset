@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78046e253cd61c54dba1c57fa9f90016, type: 3}
+  m_Name: Node_17
+  m_EditorClassIdentifier: 
+  skillName: Node_17
+  position: {x: 0, y: 0}
+  unlocked: 0
+  isTrunk: 0
+  children:
+  - {fileID: 11400000, guid: 9e1c1d96a9ba8d245b9bfd52be90b136, type: 2}
+  - {fileID: 11400000, guid: a759a110f5433924682d4353db64fbb8, type: 2}
+  parents: []
+  isPruned: 0

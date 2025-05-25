@@ -4,98 +4,86 @@ using UnityEngine.UI;
 
 public class SkillTreeUI : MonoBehaviour
 {
-    [Header("Skill Tree Data")]
-    public SkillTreeSO treeData;
+    [Header("Tree Data")]
+    public SkillTreeSO skillTree;
+    public RectTransform treeRoot;
+    public GameObject skillNodePrefab;
     public TreeManager treeManager;
 
-    [Header("Prefabs & UI")]
-    public GameObject skillUIPrefab;
-    public GameObject lineImagePrefab;
-    public Transform skillRootParent;
-
     [Header("Spacing")]
-    public float xSpacing = 300f;
-    public float ySpacing = 200f;
+    public float spacingX = 120f;
+    public float spacingY = 200f;
 
-    private Dictionary<int, int> depthToIndex = new();
-    private Dictionary<SkillNodeSO, RectTransform> nodeToUI = new();
-    private Dictionary<SkillNodeSO, int> nodeDepthMap = new();
+    private Dictionary<SkillNodeSO, Vector2Int> positions = new();
+    private HashSet<Vector2Int> occupied = new();
 
     private void Start()
     {
-        treeManager.skillTreeUI = this;
-
-        if (treeData == null || treeData.rootSkill == null)
+        if (skillTree == null || skillTree.rootNode == null)
         {
-            Debug.LogError("SkillTreeSO 또는 rootSkill이 설정되지 않았습니다.");
+            Debug.LogError("🌲 SkillTreeUI: skillTree or rootNode is null");
             return;
         }
 
-        foreach (var node in treeData.AllNodes())
-            node.unlocked = false;
+        positions.Clear();
+        occupied.Clear();
 
-        treeData.rootSkill.unlocked = true;
+        AssignPositions(skillTree.rootNode, 0, 0);
 
-        CreateSkillUI(treeData.rootSkill, 0, null);
-    }
+        int minX = int.MaxValue;
+        foreach (var pos in positions.Values)
+            if (pos.x < minX) minX = pos.x;
 
-    public void CreateSkillUI(SkillNodeSO node, int depth, RectTransform parentUI)
-    {
-        if (!depthToIndex.ContainsKey(depth))
-            depthToIndex[depth] = 0;
-
-        int index = depthToIndex[depth];
-        depthToIndex[depth]++;
-
-        Vector3 position = new Vector3(index * xSpacing, -depth * ySpacing, 0);
-
-        GameObject go = Instantiate(skillUIPrefab, skillRootParent);
-        RectTransform currentUI = go.GetComponent<RectTransform>();
-        currentUI.anchoredPosition = position;
-
-        SkillNodeUI ui = go.GetComponent<SkillNodeUI>();
-        ui.Setup(node, treeManager);
-
-        nodeToUI[node] = currentUI;
-        nodeDepthMap[node] = depth;
-
-        if (parentUI != null)
-            CreateLineBetween(parentUI, currentUI);
-
-        foreach (SkillNodeSO child in node.nextSkills)
+        foreach (var kvp in positions)
         {
-            if (!child.unlocked) continue;
-            CreateSkillUI(child, depth + 1, currentUI);
+            var node = kvp.Key;
+            var gridPos = kvp.Value;
+
+            GameObject go = Instantiate(skillNodePrefab, treeRoot);
+            RectTransform rt = go.GetComponent<RectTransform>();
+
+            float anchoredX = (gridPos.x - minX) * spacingX;
+            float anchoredY = -gridPos.y * spacingY;
+            rt.anchoredPosition = new Vector2(anchoredX, anchoredY);
+
+            go.GetComponent<SkillNodeUI>().Setup(node, treeManager);
         }
     }
 
-    public void CreateLineBetween(RectTransform from, RectTransform to)
+    private void AssignPositions(SkillNodeSO node, int depth, int x)
     {
-        GameObject lineGO = Instantiate(lineImagePrefab, skillRootParent);
-        lineGO.transform.SetAsFirstSibling();
-        UILineConnector connector = lineGO.AddComponent<UILineConnector>();
-        connector.from = from;
-        connector.to = to;
-        connector.lineRect = lineGO.GetComponent<RectTransform>();
+        if (positions.ContainsKey(node)) return;
+
+        Vector2Int pos = new(x, depth);
+        while (occupied.Contains(pos))
+        {
+            pos.y--;
+        }
+
+        positions[node] = pos;
+        occupied.Add(pos);
+
+        if (node.children == null || node.children.Count == 0) return;
+
+        int childCount = node.children.Count;
+        int mid = childCount / 2;
+
+        for (int i = 0; i < childCount; i++)
+        {
+            int offset = i - mid;
+            if (childCount % 2 == 0 && i >= mid) offset++;
+
+            int childX = node.isTrunk && node.children[i].isTrunk ? x : x + offset;
+            AssignPositions(node.children[i], pos.y - 1, childX);
+        }
     }
 
-    public RectTransform GetParentRect(SkillNodeSO node)
+    public void UpdateVisualStates()
     {
-        foreach (var kv in nodeToUI)
+        SkillNodeUI[] nodes = treeRoot.GetComponentsInChildren<SkillNodeUI>();
+        foreach (var ui in nodes)
         {
-            if (kv.Key.nextSkills.Contains(node))
-                return kv.Value;
+            ui.Setup(ui.skillNode, treeManager);
         }
-        return null;
-    }
-
-    public int GetDepthOfParent(SkillNodeSO node)
-    {
-        foreach (var kv in nodeToUI)
-        {
-            if (kv.Key.nextSkills.Contains(node))
-                return nodeDepthMap.ContainsKey(kv.Key) ? nodeDepthMap[kv.Key] + 1 : 1;
-        }
-        return 0;
     }
 }
